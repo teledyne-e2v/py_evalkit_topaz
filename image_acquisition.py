@@ -36,6 +36,10 @@ if __name__ == "__main__":
         camera.set_camera_format(10) #10b format
         #camera.set_camera_format(8)  #8b format
 
+        # Activate external trigger
+        # camera.set_trigger_mode(2)
+        # camera.set_trigger_source(2)
+
         # Pixel format and acquisition image size
         if camera.pixel_format == "RGB24":
             shape = (NIMAGES, camera.sensor_height, camera.sensor_width * 3)

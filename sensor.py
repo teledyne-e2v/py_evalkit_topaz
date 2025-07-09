@@ -1,4 +1,5 @@
 from evaluationkit import *
+import string
 
 DEFAULT_BIN_DIR = "C:/Program Files/Teledyne e2v/Evalkit-Topaz/1.0/pigentl/bin"
 DEFAULT_CTI_NAME = "pigentl.cti"
@@ -19,18 +20,18 @@ _xml_bootstrap_nodes_addresses = {
     "AWBgreenGain": 0x10414,
     "AWBblueGain": 0x10418,
     "AWBenable": 0x10400,
+    "TriggerSource": 0x11000,
 }
 
 # used to map Sensor features address from XML file
 _xml_sensor_nodes_addresses = {
     "BaseAddress": 0x30000,
     "ExposureTime": 0x3000B,
-    "VerticalSubsampling": 0x3001D,  # FIXME right address?
-    "WaitTime": 0x30009,  # FIXME -> right address? not exist on Topaz ?!
+    "WaitTime": 0x30008,
     "LineLength": 0x30006,
     "AnalogGain": 0x3000D,
     "ClampOffset": 0x30022,
-     "ChipID": 0x3007F,
+    "ChipID": 0x3007F,
 }
 
 
@@ -54,12 +55,16 @@ xml_pixel_format_type = {
     "RGB24":    0x02180014   # RGB24
 }
 
+def clean_char(text):
+    # remove non printable char from ASCII chain
+    return ''.join(c for c in text if c in string.printable)
+
 def print_info(ek):
     print("Camera INFO:")
-    print("\tManufacturer info          ", ek.vendor_name)
-    print("\tDevice name                ", ek.model_name)
-    print("\tSerial number              ", ek.serial_number)
-    print("\tDevice firmware version    ", ek.firmware_version)
+    print("\tManufacturer info          ", clean_char(ek.vendor_name))
+    print("\tDevice name                ", clean_char(ek.model_name))
+    print("\tSerial number              ", clean_char(ek.serial_number))
+    print("\tDevice firmware version    ", clean_char(ek.firmware_version))
     print("\tImage width                ", ek.sensor_width)
     print("\tImage height               ", ek.sensor_height)
     print("\tPixel format               ", ek.pixel_format)
@@ -211,3 +216,19 @@ class Topaz(EvaluationKit):
     def set_camera_format(self, format):
         err = self.write(address=_xml_bootstrap_nodes_addresses["PixelFormat"], data=xml_pixel_format_nbits[format])
         return err
+
+    def set_trigger_source(self, source):
+        #trigger source: 0=Trig_None 1=Trig_Generator 2=Trig_Ext1 4=Trig_Sensor_Rdy
+        err = self.write(address=_xml_bootstrap_nodes_addresses["TriggerSource"], data=source)
+        return err
+
+    def set_trigger_mode(self, mode):
+        #TRIG mode      0:no trig   1:forbidden   2:trig frame  tint by com interface    3:trig ITC  use both edge of trig
+        address=0x03
+        mask=0xF3FF # b11 / b10
+        reg = self.read_sensor_reg(address)
+        mode = mode << 10
+        value = (reg & mask) + mode
+        err = self.write_sensor_reg(address, value)
+        return err
+
