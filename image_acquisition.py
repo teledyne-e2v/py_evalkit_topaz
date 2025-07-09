@@ -15,9 +15,6 @@ from sensor import Topaz
 NIMAGES = 1  # Number of images to be acquired
 INTERVAL_PLOT = 0.0001  # Refresh rate in ms
 EXPOSURE_TIME = 25  # Integration time in ms
-R_GAIN = 1.8  # Red color gain
-G_GAIN = 1  # Green color gain
-B_GAIN = 1.6  # Blue color gain
 
 #  SIMPLE OBJECT CREATION AND IMAGE ACQUISITION
 if __name__ == "__main__":
@@ -35,39 +32,22 @@ if __name__ == "__main__":
         print("RD 0x{:02x} = 0x{:04x}".format(addr, rval))
         sleep(0.5)
 
-        # print("\r\t" + str(NBImageAcquired) + "/" + str(NIMAGES) + " images acquired", end="\t\t\t")
-
         # Setup camera format
         camera.set_camera_format(10) #10b format
         #camera.set_camera_format(8)  #8b format
 
-        # Exposure time
-        camera.exposure_time = EXPOSURE_TIME
         # Pixel format and acquisition image size
         if camera.pixel_format == "RGB24":
-            # camera.white_balance(red=R_GAIN, green=G_GAIN, blue=B_GAIN)
-            camera.enable_white_balance(enable=1)
             shape = (NIMAGES, camera.sensor_height, camera.sensor_width * 3)
         else:
             shape = (NIMAGES, camera.sensor_height, camera.sensor_width)
-        
         im = np.zeros(shape, dtype=xml_pixel_format_nptypes[camera.pixel_format])
 
         # Get current setting
         print_info(camera)
 
-        # Start acquisition for white balance
-        if camera.pixel_format == "RGB24":
-            camera.start_acquisition()
-            # Do white balance
-            camera.do_white_balance(enable=1)
-            camera.do_white_balance(enable=0)
-            sleep(0.05)
-            # Terminate acquisition
-            camera.stop_acquisition()
-
-        # define a parameter to sweep here - remove this part in no parameter needed
-        param_exposure = [10]
+        # define a parameter to sweep - example with exposure in ms
+        param_exposure = [10, 20, 50]
         for p in param_exposure:
             camera.exposure_time = p
             print("\nparam: exposure=" + str(p))
@@ -117,9 +97,7 @@ if __name__ == "__main__":
 
                     # SAVE IMAGE: TIFF FORMAT
                     # Convert to PIL object to save image in a tiff file
-                    # img = Image.fromarray(image, 'RGB')
                     img = Image.fromarray(image, )
-                    #imgName = "EK-image_" + str(NBImageAcquired) + ".tiff"
                     imgName = "EK-image_" + "exp-" + str(p) + "_" + str(NBImageAcquired) + ".tiff"
                     img.save(imgName)
                     print("\r\t" + str(NBImageAcquired) + "/" + str(NIMAGES) + " images processed")
@@ -128,7 +106,7 @@ if __name__ == "__main__":
             else:
                 raise Exception("Image acquisition error. Please reboot the camera")
 
-            # Terminate connection
-            camera.close()
+        # Terminate connection
+        camera.close()
     else:
         raise Exception("Camera initialization error. Please reboot the camera")
