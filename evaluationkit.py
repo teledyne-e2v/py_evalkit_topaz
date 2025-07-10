@@ -196,7 +196,7 @@ class EvaluationKit:
         err = self.lib.PiGentlSdkFlushBuffers(self._handle)
         return err
 
-    def get_image(self, timeout=5000):
+    def get_image(self, timeout=500000):
         """This function get an image from preallocated buffer.
         """
         image = None

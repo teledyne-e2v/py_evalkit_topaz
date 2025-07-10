@@ -12,7 +12,7 @@ from PIL import Image
 # USER PARAMETERS
 from sensor import Topaz
 
-NIMAGES = 1  # Number of images to be acquired
+NIMAGES = 5  # Number of images to be acquired
 INTERVAL_PLOT = 0.0001  # Refresh rate in ms
 EXPOSURE_TIME = 25  # Integration time in ms
 
@@ -37,8 +37,8 @@ if __name__ == "__main__":
         #camera.set_camera_format(8)  #8b format
 
         # Activate external trigger
-        # camera.set_trigger_mode(2)
-        # camera.set_trigger_source(2)
+        #camera.set_trigger_mode(2)
+        #camera.set_trigger_source(2)
 
         # Pixel format and acquisition image size
         if camera.pixel_format == "RGB24":
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         print_info(camera)
 
         # define a parameter to sweep - example with exposure in ms
-        param_exposure = [10, 20, 50]
+        param_exposure = [10]
         for p in param_exposure:
             camera.exposure_time = p
             print("\nparam: exposure=" + str(p))
