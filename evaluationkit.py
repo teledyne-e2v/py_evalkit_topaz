@@ -1,6 +1,7 @@
 import time
 import struct
 from utils import *
+import win32api
 
 CAM_ERR_SUCCESS = 0
 NBUFFER = 100
@@ -70,6 +71,8 @@ class EvaluationKit:
         self.lib = self._register_lib_args(libc)
 
         # Initializate library
+        print("pigentl-sdk lib path:  " + str(dll_path))
+        print("pigentl-sdk version:   " + str(self.getSdkVersion(dll_path)))
         err = self.lib.PiGentlSdkInitializeLibrary()
         if err != CAM_ERR_SUCCESS:
             raise Exception(f"PiGentlSdkInitializeLibrary: {err}. Is the camera already in use?")
@@ -231,3 +234,9 @@ class EvaluationKit:
         buffer = ctypes.create_string_buffer(size.value)
         err = self.lib.PiGentlSdkGetLastError(ctypes.c_int(error_code), buffer, ctypes.byref(size))
         return err, buffer.raw.decode("latin-1").replace("\x00", "")
+
+    def getSdkVersion(self, dll_path):
+        info = win32api.GetFileVersionInfo(dll_path, '\\')
+        ms = info['FileVersionMS']
+        ls = info['FileVersionLS']
+        return f"{ms >> 16}.{ms & 0xFFFF}.{ls >> 16}.{ls & 0xFFFF}"
