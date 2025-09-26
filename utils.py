@@ -2,6 +2,7 @@ import os
 import ctypes
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
 
 
 # used to convert from the EK/XML pixel format to colormap
@@ -164,3 +165,19 @@ def imageHist(im):
     plt.ylabel("Number of pixels")
     plt.xlabel("Signal level[LSB]")
     plt.title("Accumulated histogram")
+
+def imageRoi(im, roi):
+    # roi[start_point, end_point]
+    bottom= min(int(roi[0][1]), int(roi[1][1]))
+    top= max(int(roi[0][1]), int(roi[1][1]))
+    left= min(int(roi[0][0]), int(roi[1][0]))
+    right= max(int(roi[0][0]), int(roi[1][0]))
+    if(top == bottom): top=bottom+1
+    if (left == right): right=left+1
+    # print(f'bottom={bottom}, top={top}, left= {left}, right={right}')
+    cropped= im[bottom:top, left:right]
+    return cropped
+def sharpness(im):
+    laplacian = cv2.Laplacian(im, cv2.CV_64F)
+    variance = laplacian.var()
+    return variance

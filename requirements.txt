@@ -2,3 +2,4 @@ matplotlib
 numpy
 Pillow
 pywin32
+opencv-python

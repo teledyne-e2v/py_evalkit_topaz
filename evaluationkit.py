@@ -205,7 +205,7 @@ class EvaluationKit:
         image = None
         ImageInfos = tImageInfos()
         err = self.lib.PiGentlSdkGetBuffer(self._handle, ctypes.byref(ImageInfos), timeout)
-        if err == CAM_ERR_SUCCESS:
+        if err == (CAM_ERR_SUCCESS & (not ImageInfos.isIncomplete) & ImageInfos.isNewData):
             data = ctypes.cast(ImageInfos.pDatas, ctypes.POINTER(ctypes.c_ubyte))
             bytesPerPixel = int((ImageInfos.iImageSize / (ImageInfos.iImageHeight * ImageInfos.iImageWidth)))
             # Get image from byte buffer
