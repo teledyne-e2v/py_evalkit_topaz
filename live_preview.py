@@ -26,6 +26,9 @@ start_point = None
 end_point = None
 roi = None
 
+#Camera control
+exposure = 10
+control = False
 
 def mouse_callback(event, x, y, flags, param):
     global start_point, end_point, drawing
@@ -48,6 +51,11 @@ def mouse_callback(event, x, y, flags, param):
         end_point = None
         print(f"Reset ROI")
 
+def change_exposure(val):
+    global control, exposure
+    control=True
+    exposure=val
+
 #  SIMPLE OBJECT CREATION AND IMAGE ACQUISITION
 if __name__ == "__main__":
     print("*******************************************************************")
@@ -65,8 +73,8 @@ if __name__ == "__main__":
         sleep(0.5)
 
         # Setup camera format
-        # camera.set_camera_format(10) #10b format
-        camera.set_camera_format(8)  #8b format
+        camera.set_camera_format(10) #10b format
+        # camera.set_camera_format(8)  #8b format
 
         # Sensor parameters
         camera.exposure_time= EXPOSURE_TIME
@@ -91,6 +99,7 @@ if __name__ == "__main__":
             # fig = init_figure(camera)
             cv2.namedWindow('Live preview', cv2.WINDOW_AUTOSIZE)
             cv2.setMouseCallback('Live preview', mouse_callback)
+            cv2.createTrackbar("Exposure", 'Live preview', 1, 500, change_exposure)
 
             while preview:
                 # Get image from internal buffer
@@ -101,6 +110,11 @@ if __name__ == "__main__":
                 Insert your processing code here
                 image is the current image acquired
                 """
+                # CONTROL
+                if(control):
+                    camera.exposure_time = exposure
+                    control = False
+
                 # IMAGE PROCESS
                 if(roi and (not drawing)):
                     mean = np.mean(imageRoi(im,roi))
